@@ -65,53 +65,47 @@ class Isotropic(Profile):
         # create interpolation function to sample `r` from:
         from scipy.interpolate import interp1d
         intp = interp1d(rad_arr, int_arr, fill_value="extrapolate")
-	
-        if isinstance(r, np.ndarray):
-            results = np.zeros(r.shape[0], dtype='float')
-            for ind, rind in enumerate(r):
-                integrand = lambda x: (self.density(x) * self.G * self.cumulatove_mass(x))/np.power(x,2)
-                results[i] = 1./self.density(r[i]) * integrate.quad(integrand, r[i], np.inf, limit=100)[0]
-        else:
-            integrand = lambda x: (self.density(x) * self.G * self.mass_enclosed(x))/np.power(x,2)
-            results = 1./self.density(r) * integrate.quad(integrand, r, np.inf, limit=100)[0]
-	return results
+        
+	return intp(r)
 
-    def df(self, rad, vel):
+    def distribution_function(self, rad: float, vel: float) -> float:
+        """Equation """"
+        E = self.energy(rad, vel)
+        q = np.sqrt(self.q_squared(E))
+	return self.distribution_function_q(q)
+
+    def energy(self, rad: float, vel: float) -> float:
+        """Binding energy """"
+        return self.potential(rad) + vel**2/2.0
+
+    def density_of_states(self, rad: float, vel: float) -> float:
 	E = self.energy(rad, vel)
-	q = np.sqrt(-self.a*E/self.G/self.M)
-	return self.df_q(q)
+        q = np.sqrt(self.q_squared(E))
+	return self.density_of_states_q(q)
 
-    def dos(self, rad, vel):
-	E = self.energy(rad, vel)
-	q = self.q_(E)
-	return self.dos_q(q)
+    def q_squared(self, E: float) -> float: 
+        """Squared dimensionless binding energy
+        Note: This quantity is squared compared to the Hernquist one
+        """
+        return -self.a * E / (G_MSOL * self.M)
 
-    def energy(self, rad, vel):
-        return self.potential(rad) + np.power(vel,2)/2.
+    def distribution_function_q(self, q: float) -> float:
+	"""Equatin 17"""
+	constant = self.M / (self.a*np.pi)**3 / 4.0 / np.power(2.0*G_MSOL*self.M/self.a, 1.5)
+	A = 1.0 / / np.power(1.0-q**2, 2.5)
+        B = 3.0 * np.arcsin(q) 
+        C = q * np.sqrt(1.0 - q**2) * (1.0 - 2.0*q**2) * (8.0*q**4 - 8.0*q**2 - 3.0)
+	return constant * A*(B + C)
 
-    def q_(self, E):
-        return np.sqrt(-self.a*E/(self.G*self.M))
-
-    def df_q(self, q):
-	M = self.M
-	a = self.a
-        G = self.G
-	constant = M/np.power(a,3)/4./np.power(np.pi,3)/np.power(2.*G*M/a,1.5)
-        A = (3. * np.arcsin(q))/np.power(1.-q*q,2.5)
-        B = q * np.sqrt(1. - np.power(q,2)) * (1. - 2.*np.power(q,2)) * (8.*np.power(q,4) - 8.*np.power(q,2) - 3.)
-	return constant * (A + B)
-
-    def dos_q(self, q):
-	M = self.M
-	a = self.a
-        G = self.G
-	constant = (2./3 * np.pi * np.pi * np.power(a,2.5) * np.sqrt(2.*G*M))/np.power(q,2)
-        A = 3.*(8.*np.power(q,4) - 4.*np.power(q,2) - 1.) * np.arccos(q)
-        B = q * np.sqrt(1.-np.power(q,2)) * (4*np.power(q,2) - 1.) * (2.*np.power(q,2) + 3.)
+    def density_of_states_q(self, q: float) -> float:
+	"""Equation 23"""
+	constant = (2.0/3.0 * np.pi**2 * self.a**2.5 * np.sqrt(2.0*G_MSOL*self.M)) / q**5
+        A = 3.0 * (8.0*q**4 - 4.0*q**2 + 1.0) * np.arccos(q)
+        B = q * np.sqrt(1.0-q**2) * (4.0*q**2 - 1.0) * (2.0*q**2 + 3.0)
 	return constant * (A - B)
 
-class Model(Profile):
 
+class Model(Profile):
     def __init__(self, **kwargs):
         super(Model, self).__init__(**kwargs)
         self.isotropic = Isotropic(**kwargs)
