@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # system ----
+import numpy as np
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
