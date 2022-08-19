@@ -45,7 +45,11 @@ class Profile(object):
                 results *= constant * (1.0 - np.power(r/(r+self.a), 2.0-self.gamma))
         return results
 
-    def mass_enclosed(self, r: float) -> float:
+    def dphi_dr(self, r: float) -> float:
+	"""Derivative of potential wrt radius r"""
+	return G_MSOL * self.cumulative_mass(r) / r**2
+
+    def cumulative_mass(self, r: float) -> float:
         """Equation 3"""
         return self.M * np.power(r/(r+self.a), 3.0-self.gamma)
 
@@ -71,14 +75,14 @@ class Isotropic(Profile):
         """Equation 6, but using basic integral definition here"""
         
         # define integrand
-        integrand = lambda x: self.density(x) * G_MSOL * self.mass_enclosed(x) / x**2
+       integrand = lambda x: self.density(x) * self.dphi_dr(x)
         
         # quad integrate integrand within radial range
         from scipy.integrate import quad
         power_arr = np.linspace(1e-3, 3, 50)
         rad_arr = 10.0 ** power_arr
         int_arr = np.array([integrate.quad(integrand, r, np.inf, limit=100)[0] for r in rad_arr])
-        int_arr /= rad_arr
+        int_arr /= self.density(rad_arr)
         
         # create interpolation function to sample `r` from:
         from scipy.interpolate import interp1d
