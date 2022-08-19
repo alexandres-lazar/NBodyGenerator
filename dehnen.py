@@ -90,11 +90,11 @@ class Isotropic(Profile):
         
 	return intp(r)
 
-    def df(self, rad: float, vel: float) -> float:
+    def distribution_function(self, rad: float, vel: float) -> float:
         """Equation """"
         E = self.energy(rad, vel)
         q = np.sqrt(self.q_squared(E))
-	return self.df_q(q)
+	return self.distribution_function_q(q)
 
     def energy(self, rad: float, vel: float) -> float:
         """Binding energy """"
@@ -126,7 +126,7 @@ class Isotropic(Profile):
                 results = np.power((1.0-(2.0-self.gamma)*psi), 1.0/(2.0-self.gamma))
         return results
 
-    def df_q(self, q: float) -> float:
+    def distribution_function_q(self, q: float) -> float:
         """Equation 11"""
 	      factor = (3.0-self.gamma)  * self.M/(2.0*np.power(2.0*np.pi**2*G_MSOL*self.M*self.a, 1.5))
         if isinstance(q, np.ndarray):
