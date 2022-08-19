@@ -1,15 +1,11 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # system ----
-import os
-import sys
-import numpy as np
 from timeit import default_timer as timer
 
 # local ----
-sys.path.append('..')
-import generate
+import phase_space
 
 start = timer()
-generate.PhaseSpace(Nparticles = 1e+6).all()
-print timer() - start
+phase_space.Generate(n_particles=1e+6).all()
+print(f"Wall-clock time from execuation: {timer() - start} sec")
