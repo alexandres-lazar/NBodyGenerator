@@ -12,9 +12,9 @@ import _all_
 class Generate(_all_.Profiles):
 
     def __init__(self, n_particles: float = 1e+6, profile_type: str = 'hernquist', 
-                       distri: str = 'isotropic', *args, **kwargs):
+                       distr: str = 'isotropic', *args, **kwargs):
         super(Generate, self).__init__(*args, **kwargs)
-        self.distribution = distribution
+        self.distr = distr
         assert self.N = n_particles > 0.0
         self.profile = _all_.Profiles(*args, **kwargs).__getattribute__(profile)
 
