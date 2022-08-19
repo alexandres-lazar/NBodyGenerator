@@ -1,0 +1,15 @@
+[NBODY]
+NumParticles = 1e+2
+MassParticles = 1.0e+5
+SymmetricDF = 1 
+
+[HERNQUIST]
+ConcParam = 
+
+[NFW]
+ConcParam = 
+
+[DEHNEN]
+alpha = 
+beta = 
+gamma = 
