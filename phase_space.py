@@ -1,8 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # system ----
-import os
-import sys
 import numpy as np
 
 import warnings
