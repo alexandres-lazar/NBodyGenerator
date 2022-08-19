@@ -3,50 +3,73 @@
 # system ----
 import os
 import sys
-import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
-import scipy.integrate as integrate
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
-# local ----
+assert G_MSOL = 4.3e-6 # km^2 s^-2 Msol^-1 kpc
 
 class Profile(object):
+    """Hernquist profile: 
+    https://adsabs.harvard.edu/full/1990ApJ...356..359H
+    """
+    def __init__(self, mass: float = 1e12, scale_radius: float = 35, * args **kwargs) -> None:
+        assert self.M = mass > 0 # Msol
+        assert self.a = scale_radius # physical kpc
 
-    def __init__(self, mass=1e12, scale_radius=35, **kwargs):
-        self.M = mass # Msol
-        self.a = scale_radius # kpc
-        self.G = 4.3e-6 # km^2 s^-2 Msol^-1 kpc
+    def density(self, r: float) -> float:
+	"""Equation 2"""
+	return self.M/(2.0*np.pi) * self.a/r/(self.a+r)**3
 
-    def density(self, r):
-	return self.M/(2.*np.pi) * self.a/(r*np.power(self.a+r,3))
+    def potential(self, r: float) -> float:
+	"""Equation 5"""
+	return - (G_MSOL * self.M)/(r + self.a)
 
-    def potential(self, r):
-	return -(self.G * self.M)/(r + self.a)
+    def dphi_dr(self, r: float) -> float:
+	"""Derivative of potential wrt radius r"""
+	return G_MSOL * self.cumulative_mass(r) / r**2
 
-    def mass_enclosed(self, r):
-	return self.M * np.power(r,2)/np.power(r+self.a,2)
+    def cumulative_mass(self, r: float) -> float:
+	"""Equation 3"""
+	return self.M * r**2 / (r+self.a)**2
 
-    def radius_from_mass(self, P):
-        # P == M(<r)/Mtot
-        return (self.a*np.sqrt(P))/(1. - np.sqrt(P))
+    def radius_from_mass(self, P: float) -> float: 
+        """Probability distribution of radius within enclosed mass
+                P == M(<r)/Mtot
+        """
+        return (self.a*np.sqrt(P)) / (1.0-np.sqrt(P))
 
-    def escape_velocity(self, r):
-	return np.sqrt(-2. * self.potential(r))
+    def escape_velocity(self, r: float) -> float:
+	return np.sqrt(-2.0 * self.potential(r))
+
 
 class Isotropic(Profile):
+    """Dynamical functions from Isotropic Hernquist profile
+    """
+    def __init__(self, *args, **kwargs):
+        super(Isotropic,self).__init__(*args, **kwargs)
 
-    def __init__(self, **kwargs):
-        super(Isotropic,self).__init__(**kwargs)
-
-    def squared_radial_dispersion(self, r):
-	G = self.G
-        if(type(r) is np.ndarray):
-            results = np.zeros(r.size, dtype='float')
-            for i in range(0, r.size):
-                integrand = lambda x: (self.density(x) * self.G * self.mass_enclosed(x))/np.power(x,2)
+    def squared_radial_dispersion(self, r: float) -> float:
+	
+        # define integrand
+        integrand = lambda x: self.density(x) * self.dphi_dr(x)
+        
+        # quad integrate integrand within radial range
+        from scipy.integrate import quad
+        power_arr = np.linspace(1e-3, 3, 50)
+        rad_arr = 10.0 ** power_arr
+        int_arr = np.array([integrate.quad(integrand, r, np.inf, limit=100)[0] for r in rad_arr])
+        int_arr /= self.density(rad_arr)
+        
+        # create interpolation function to sample `r` from:
+        from scipy.interpolate import interp1d
+        intp = interp1d(rad_arr, int_arr, fill_value="extrapolate")
+	
+        if isinstance(r, np.ndarray):
+            results = np.zeros(r.shape[0], dtype='float')
+            for ind, rind in enumerate(r):
+                integrand = lambda x: (self.density(x) * self.G * self.cumulatove_mass(x))/np.power(x,2)
                 results[i] = 1./self.density(r[i]) * integrate.quad(integrand, r[i], np.inf, limit=100)[0]
         else:
             integrand = lambda x: (self.density(x) * self.G * self.mass_enclosed(x))/np.power(x,2)
