@@ -84,13 +84,13 @@ class Isotropic(Profile):
         from scipy.interpolate import interp1d
         intp = interp1d(rad_arr, int_arr, fill_value="extrapolate")
         
-	  return intp(r)
+	return intp(r)
 
     def df(self, rad: float, vel: float) -> float:
         """Equation """"
-       E = self.energy(rad, vel)
-	     q = np.sqrt(self.q_squared(E))
-	     return self.df_q(q)
+        E = self.energy(rad, vel)
+        q = np.sqrt(self.q_squared(E))
+	return self.df_q(q)
 
     def energy(self, rad: float, vel: float) -> float:
         """Binding energy """"
