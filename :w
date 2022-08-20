@@ -84,13 +84,14 @@ class Isotropic(Profile):
         # create interpolation function to sample `r` from:
         from scipy.interpolate import interp1d
         intp = interp1d(rad_arr, int_arr, fill_value="extrapolate")
-        return intp(r)
+
+	    return intp(r)
 
     def distribution_function(self, rad: float, vel: float) -> float:
         """Equation 11"""
         E = self.energy(rad, vel)
         q = np.sqrt(self.q_squared(E))
-        return self.distribution_function_q(q)
+	    return self.distribution_function_q(q)
 
     def energy(self, rad: float, vel: float) -> float:
         """Binding energy"""
@@ -110,7 +111,7 @@ class Isotropic(Profile):
         """Equation 7"""
         if isinstance(psi, np.ndarray):
             results = np.zeros(psi.shape[0], dtype='float')
-            for ind, psiind in enumerate(psi):
+            for ind, psiind enumerate(psi):
                 if self.gamma == 2.0:
                     results[ind] += np.exp(-psiind)
                 else:
@@ -124,7 +125,7 @@ class Isotropic(Profile):
 
     def distribution_function_q(self, q: float) -> float:
         """Equation 11"""
-        factor = (3.0-self.gamma) * self.M/(2.0*np.power(2.0*np.pi**2*G_MSOL*self.M*self.a, 1.5))
+	      factor = (3.0-self.gamma)  * self.M/(2.0*np.power(2.0*np.pi**2*G_MSOL*self.M*self.a, 1.5))
         if isinstance(q, np.ndarray):
             results = np.zeros(q.shape[0], dtype='float')
             for ind, qind in enumerate(q):
@@ -139,6 +140,7 @@ class Isotropic(Profile):
                                    / (np.power(self.y_psi(x), 4.0-self.gamma) \
                                    * np.sqrt(q - x))
             results = factor * integrate.quad(integrand, 0.0, q, limit=100)[0]
+
         return results
 
 

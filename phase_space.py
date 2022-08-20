@@ -10,28 +10,29 @@ warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 import _all_
 
 class Generate(_all_.Profiles):
-
-    def __init__(self, n_particles: float = 1e+6, profile_type: str = 'hernquist', 
+    """Generates the initial conditions from a analytical profile
+    """
+    def __init__(self, n_particles: float = 1e+6, profile: str = 'hernquist',
                        distr: str = 'isotropic', *args, **kwargs):
         super(Generate, self).__init__(*args, **kwargs)
         self.distr = distr
-        assert self.N = n_particles > 0.0
+        self.N = n_particles
         self.profile = _all_.Profiles(*args, **kwargs).__getattribute__(profile)
 
     def all(self) -> float:
         N = np.int64(self.N)
-        printf f"| Generating {N:0.3e} the positions and velocities"
+        print(f"| Generating {N:0.3e} the positions and velocities")
         pos_arr = np.zeros((N, 3))
         vel_arr = np.zeros((N, 3))
         for __ in range(N):
             posN = self.position()
             pos_arr[__] += posN
             vel_arr[__] += self.velocity(self.magnitude(posN))
-        print("| Particle generation complete now)
+        print("| Particle generation complete now")
         print("| Saving the positions and velocities into separate files")
         np.save('positions.npy', pos_arr)
         np.save('velocities.npy', vel_arr)
-        
+
         return None
 
     def position(self) -> float:
@@ -49,26 +50,25 @@ class Generate(_all_.Profiles):
         pos_vec = [pos_x, pos_y, pos_z]
         return np.array(pos_vec)
 
-    def velocity(self, rad: float) -> float: 
-        """Generates velocities from genereate positions (symbiotic)"""      
+    def velocity(self, rad: float) -> float:
+        """Generates velocities from genereate positions (symbiotic)"""
         vesc = self.profile.escape_velocity(rad)
-        df = self.profile.__getattribute__(self.distribution).distribution_function
-        fmax = vmax**2 * df(rad, vel=0.0)
-              
+        df = self.profile.__getattribute__(self.distr).distribution_function
+        fmax = vesc**2 * df(rad, vel=0.0)
+
         # Monte Carlo rejection method
         counter = 0
         failure = 0
         while counter < 1:
             wf = np.random.uniform() * fmax
-            wv = np.random.uniform() * vmax
-             = wv * wv * df(rad, vel=wv)
-            cond = wf <= wv**2 * df(rad, vel=wv)
+            wv = np.random.uniform() * vesc
+            cond = (wf <= wv**2 * df(rad, vel=wv))
             if cond:
                 vel_mag = wv
                 counter += 1
             else:
                 failure += 1
-        
+
         # Compute velocities within sphere
         theta = np.random.uniform() * (2.0*np.pi)
         varphi = np.random.uniform() * np.pi
