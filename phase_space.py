@@ -21,14 +21,17 @@ class Generate(_all_.Profiles):
 
     def all(self) -> float:
         N = np.int64(self.N)
-        print(f"| Generating {N:0.3e} the positions and velocities")
+        print(f"| Generating coordinates and velocities for {N:0.3e} particles")
         pos_arr = np.zeros((N, 3))
         vel_arr = np.zeros((N, 3))
         for __ in range(N):
             posN = self.position()
             pos_arr[__] += posN
             vel_arr[__] += self.velocity(self.magnitude(posN))
-        print("| Particle generation complete now")
+        print("| Particle generation complete")
+        print(f": Coordinate range: {pos_arr.min():0.3f} -- {pos_arr.max():0.3f} kpc")
+        print(f": Velocity range: {vel_arr.min():0.3f} -- {vel_arr.max():0.3f} km/s")
+
         print("| Saving the positions and velocities into separate files")
         np.save('positions.npy', pos_arr)
         np.save('velocities.npy', vel_arr)
