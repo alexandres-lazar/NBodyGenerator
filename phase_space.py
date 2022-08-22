@@ -14,7 +14,8 @@ class Generate(all_models.Profiles):
     """Generates the initial conditions from a analytical profile
     """
     def __init__(self, mass: float = 1e12, concentration: float = None,
-                       scale_radius: float = None, n_particles: float = 1e6,
+                       scale_radius: float = None, gamma: float = 1.5,
+                       n_particles: float = 1e6,
                        profile: str = 'hernquist', distr: str = 'isotropic',
                        *args, **kwargs):
         #print(concentration, scale_radius)
@@ -26,19 +27,26 @@ class Generate(all_models.Profiles):
         self.part_mass = mass / n_particles  # Msol
         self.distr = distr
         self.profile_name = profile
-
-        if profile == 'nfw':
+        self.gamma = gamma
+        if profile == 'dehnen':
+            self.profile = all_models.Profiles(concentration=concentration,
+                                               scale_radius=scale_radius,
+                                               gamma=gamma,
+                                               *args, **kwargs).__getattribute__(profile)
+        else:
             self.profile = all_models.Profiles(concentration=concentration,
                                                scale_radius=scale_radius,
                                                *args, **kwargs).__getattribute__(profile)
-            if scale_radius is not None:
-                self.rs = scale_radius
-                self.conc = self.profile.concentration()
-                self.saveName = f"{profile}_{distr}_log10n{np.log10(n_particles):.0f}_log10m{np.log10(mass):.0f}_rs{self.rs:.0f}"
-            elif concentration is not None:
-                self.conc = concentration
-                self.rs = self.profile.scale_radius()
-                self.saveName = f"{profile}_{distr}_log10n{np.log10(n_particles):.0f}_log10m{np.log10(mass):.0f}_c{self.conc:.0f}"
+        if scale_radius is not None:
+            self.rs = scale_radius
+            self.conc = self.profile.concentration()
+            self.saveName = f"{profile}_{distr}_n{np.log10(n_particles):.0f}_m{np.log10(mass):.0f}_rs{self.rs:.0f}"
+        elif concentration is not None:
+            self.conc = concentration
+            self.rs = self.profile.scale_radius()
+            self.saveName = f"{profile}_{distr}_n{np.log10(n_particles):.0f}_m{np.log10(mass):.0f}_c{self.conc:.0f}"
+        if profile == "dehnen":
+            self.saveName += f"_gamma{self.gamma:.2f}"
 
     def all(self) -> float:
         N = np.int64(self.N)
@@ -48,6 +56,8 @@ class Generate(all_models.Profiles):
         print(f"::: scale_radius: {self.rs:.2e} kpc")
         if self.profile_name == "nfw":
             print(f"::: scale density: {self.profile.normalization():.2e} Msol/kpc")
+        if self.profile_name == "dehnen":
+            print(f"::: gamma slope: {self.gamma:.2f}")
         print(f"| Generating coordinates and velocities for {N:0.3e} particles")
         mass_arr = np.ones(N) * self.part_mass
         pos_arr = np.zeros((N, 3))

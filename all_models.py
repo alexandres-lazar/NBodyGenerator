@@ -13,10 +13,14 @@ from profiles import nfw
 
 class Profiles(object):
     def __init__(self, concentration: float = None, scale_radius: float = None,
-                 distr: str ='isotropic', *args, **kwargs) -> None:
-        #print(concentration, scale_radius)
-        self.hernquist = hernquist.Model(*args, **kwargs)
-        self.dehnen = dehnen.Model(*args, **kwargs)
+                 gamma: float = 1.5, distr: str ='isotropic', *args, **kwargs) -> None:
+        self.hernquist = hernquist.Model(concentration=concentration,
+                             scale_radius=scale_radius,
+                             *args, **kwargs)
+        self.dehnen = dehnen.Model(concentration=concentration,
+                             scale_radius=scale_radius,
+                             gamma=gamma,
+                             *args, **kwargs)
         self.nfw = nfw.Model(concentration=concentration,
                              scale_radius=scale_radius,
                              *args, **kwargs)

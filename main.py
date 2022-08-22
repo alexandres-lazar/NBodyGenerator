@@ -11,18 +11,22 @@ import phase_space
 def main() -> None:
     start = timer()
     print("-" * 75)
-    halo_mass = 1e12  # Msol
-    npart = 1e6
-    c = 12
-    #prof_list = ['nfw', 'herquist']
-    prof_list = ['nfw']
 
-    for prof_name in prof_list:
-        phase_space.Generate(mass=halo_mass,
-                             concentration=c,
-                             n_particles=npart,
-                             profile=prof_name).all()
-        print("-" * 75)
+    npart = 1e4
+
+    """
+    kwargs = {'mass': 1e12, 'n_particles': npart, 'concentration': 12}
+    phase_space.Generate(profile='nfw', **kwargs).all()
+
+    kwargs = {'mass': 1e12, 'n_particles': npart, 'scale_radius': 35}
+    phase_space.Generate(profile='hernquist', **kwargs).all()
+    """
+
+    kwargs = {'mass': 1e12, 'n_particles': npart, 'scale_radius': 35,
+              'gamma': 1.5}
+    phase_space.Generate(profile='dehnen', **kwargs).all()
+
+    print("-" * 75)
 
     print(f"Wall-clock time from execuation: {timer() - start} sec")
     print("-" * 75)
