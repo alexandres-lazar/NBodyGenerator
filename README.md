@@ -20,11 +20,10 @@ Profiles available are:
 * [Navarro, Frenk, and White](https://arxiv.org/pdf/astro-ph/9508025.pdf) (NFW) Halo: 
     * Analytical functions worked out in [Lokas and Mamon (2001)](https://arxiv.org/pdf/astro-ph/0002395.pdf).
     * Radial sampling using real value of [Lambert W function](https://en.wikipedia.org/wiki/Lambert_W_function) transformation of inverted mass profile.
-    * Distribution functions approximated using Appendix of (Widrow (2000))[https://arxiv.org/pdf/astro-ph/0003302.pdf].
-      * Only isotropic profile encoded.
+    * Distribution functions approximated from [Widrow (2000)](https://arxiv.org/pdf/astro-ph/0003302.pdf).
+      * Only isotropic dynamics.
 
 * __[Work in progress]___ Dehnen (+Jaffe and Hernquist) Halo (Isotropic):
     * _Warning_: Quadrature integration is used solve distribution function makes this computaitonally exhausting.
 
 ---
-
